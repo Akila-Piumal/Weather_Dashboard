@@ -21,17 +21,17 @@ export class WeatherDashboard {
   searchText = 'Colombo'
 
   allCities = [
-    {name: 'Colombo' , value: 'colombo'},
-    {name: 'Kandy' , value: 'kandy'},
-    {name: 'Galle' , value: 'galle'},
-    {name: 'Jaffna' , value: 'jaffna'},
-    {name: 'Trincomalee' , value: 'trincomalee'},
-    {name: 'Anuradhapura' , value: 'anuradhapura'},
-    {name: 'Batticaloa' , value: 'batticaloa'},
-    {name: 'Matara' , value: 'matara'}
+    {name: 'Colombo' , value: 'colombo', lat: 6.9271, lon: 79.8612},
+    {name: 'Kandy' , value: 'kandy', lat: 7.2906, lon: 80.6337},
+    {name: 'Galle' , value: 'galle', lat: 6.0329, lon: 80.217},
+    {name: 'Jaffna' , value: 'jaffna', lat: 9.6615, lon: 80.0255},
+    {name: 'Trincomalee' , value: 'trincomalee', lat: 8.5874, lon: 81.2152},
+    {name: 'Anuradhapura' , value: 'anuradhapura', lat: 8.3114, lon: 80.4037},
+    {name: 'Batticaloa' , value: 'batticaloa', lat: 7.7170, lon: 81.7000},
+    {name: 'Matara' , value: 'matara', lat: 5.9549, lon: 80.5550 }
   ]
 
-  selectedCity = 'colombo';
+  selectedCity = this.allCities[0];
   currentTime = '';
   currentDate = '';
 
@@ -39,7 +39,9 @@ export class WeatherDashboard {
   isError = false;
 
   forecastData:any
-  weatherData:any
+  currentWeatherData:any
+  hourlyData = [];
+  dailyData = [];
   showError = ''
   dailyForecasts:any = [];
   hourlyForecasts:any = [];
@@ -50,7 +52,7 @@ export class WeatherDashboard {
   mainHumidity = ''
   mainWindSpeed = ''
   mainPressure = ''
-  mainUV = ''
+  mainUV:any
   sunsetTime = ''
   sunriseTime = ''
   mainWeatherIcon = ''
@@ -67,11 +69,29 @@ export class WeatherDashboard {
       map(value => this._filter(value || ''))
     );
 
+
+
     // Get Weather Data on init
     this.getWeatherData();
   }
 
-  onCityChange(cityValue: string) {
+  // WE CAN GET LAN AND LON FOR FREE ITH THIS. BUT HAVE TO CALL SEPERATE API REQUEST FOR EACH CITY
+  async getLatAndLon(){
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.searchText},Sri+Lanka&format=json&limit=1`);
+    
+    console.log("RESPONSe===============>>>",response);
+    const data = await response.json();
+    if (data.length > 0) {
+      const city = {name: this.searchText , value: this.searchText, lat: data[0].lat, lon: data[0].lon }
+      this.selectedCity = city;
+      console.log(`${this.searchText}: ${data[0].lat}, ${data[0].lon}`);
+      this.getWeatherData();
+    }else{
+      alert("City name not found.")
+    }
+  }
+
+  onCityChange(cityValue:any) {
     console.log("Selected city:", cityValue);
     // Call your weather API or any other function here
     this.getWeatherData()
@@ -86,8 +106,10 @@ export class WeatherDashboard {
 
       // Fetch current weather data
       // const currentWeatherUrl = `${this.baseUrl}/weather?lat=${city.lat}&lon=${city.lon}&appid=${this.apiKey}&units=metric`;
-      const currentWeatherUrl = `${this.baseUrl}/weather?q=${this.selectedCity},LK&appid=${this.apiKey}&units=metric`;
-      const currentResponse = await fetch(currentWeatherUrl);
+      // const currentWeatherUrl = `${this.baseUrl}/weather?q=${this.selectedCity},LK&appid=${this.apiKey}&units=metric`;
+      const oneCallUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${this.selectedCity.lat}&lon=${this.selectedCity.lon}&appid=${this.apiKey}&units=metric&exclude=minutely`;
+      
+      const currentResponse = await fetch(oneCallUrl);
 
       if (!currentResponse.ok) {
         this.isError = true;
@@ -95,21 +117,27 @@ export class WeatherDashboard {
         throw new Error(`HTTP error! status: ${currentResponse.status}`);
       }
 
-      this.weatherData = await currentResponse.json();
-      this.mainWeatherIcon = this.weatherData.weather[0].icon;
+      const weatherData = await currentResponse.json();
+
+      this.currentWeatherData = weatherData.current;
+      this.hourlyData = weatherData.hourly;
+      this.dailyData = weatherData.daily;
+      
+      this.mainWeatherIcon = this.currentWeatherData.weather[0].icon;
+      
 
       // Fetch 5-day forecast data
-      const forecastUrl = `${this.baseUrl}/forecast?lat=${this.weatherData.coord.lat}&lon=${this.weatherData.coord.lon}&appid=${this.apiKey}&units=metric`;
-      const forecastResponse = await fetch(forecastUrl);
+      // const forecastUrl = `${this.baseUrl}/forecast?lat=${this.weatherData.coord.lat}&lon=${this.weatherData.coord.lon}&appid=${this.apiKey}&units=metric`;
+      // const forecastResponse = await fetch(forecastUrl);
        
-      if (!forecastResponse.ok) {
-        this.isError = true;
-        this.showError = `Failed to fetch forecast data`;
-        throw new Error(`HTTP error! status: ${forecastResponse.status}`);
-      }
+      // if (!forecastResponse.ok) {
+      //   this.isError = true;
+      //   this.showError = `Failed to fetch forecast data`;
+      //   throw new Error(`HTTP error! status: ${forecastResponse.status}`);
+      // }
 
-      const forecastData = await forecastResponse.json();
-      this.forecastData = forecastData.list;
+      // const forecastData = await forecastResponse.json();
+      // this.forecastData = forecastData.list;
 
       this.updateCurrentWeather();
       this.updateDailyForecast();
@@ -125,22 +153,22 @@ export class WeatherDashboard {
   }
 
   updateCurrentWeather() {
-    this.mainTemperature = `${Math.round(this.weatherData.main.temp)}°C`;
-    this.mainFeelsLike = `Feels like: ${Math.round(this.weatherData.main.feels_like)}°C`;
-    this.mainCondition = this.weatherData.weather[0].description;
-    this.mainHumidity = `${this.weatherData.main.humidity}%`;
-    this.mainWindSpeed = `${Math.round(this.weatherData.wind.speed * 3.6)}km/h`;
-    this.mainPressure = `${this.weatherData.main.pressure}hPa`;
-    this.mainUV = this.estimateUVIndex(this.weatherData.weather[0].main); // This is only a estimated value
+    this.mainTemperature = `${Math.round(this.currentWeatherData.temp)}°C`;
+    this.mainFeelsLike = `Feels like: ${Math.round(this.currentWeatherData.feels_like)}°C`;
+    this.mainCondition = this.currentWeatherData.weather[0].description;
+    this.mainHumidity = `${this.currentWeatherData.humidity}%`;
+    this.mainWindSpeed = `${Math.round(this.currentWeatherData.wind_speed * 3.6)}km/h`;
+    this.mainPressure = `${this.currentWeatherData.pressure}hPa`;
+    this.mainUV = Math.round(this.currentWeatherData.uvi || 0);
     
 
     // Convert sunrise/sunset from Unix timestamp to local time
-    this.sunriseTime = new Date(this.weatherData.sys.sunrise * 1000).toLocaleTimeString('en-GB', { 
+    this.sunriseTime = new Date(this.currentWeatherData.sunrise * 1000).toLocaleTimeString('en-GB', { 
         hour: '2-digit', 
         minute: '2-digit',
         timeZone: 'Asia/Colombo'
     });
-    this.sunsetTime = new Date(this.weatherData.sys.sunset * 1000).toLocaleTimeString('en-GB', { 
+    this.sunsetTime = new Date(this.currentWeatherData.sunset * 1000).toLocaleTimeString('en-GB', { 
         hour: '2-digit', 
         minute: '2-digit',
         timeZone: 'Asia/Colombo'
@@ -157,25 +185,40 @@ export class WeatherDashboard {
     this.dailyForecasts = [];
     const processedDays = new Set();
 
-    this.forecastData.forEach((item:any) => {
-        const date = new Date(item.dt * 1000);
-        const dayKey = date.toDateString();
-        
-        if (!processedDays.has(dayKey) && this.dailyForecasts.length < 5) {
-            const hour = date.getHours();
-            if (hour >= 11 && hour <= 15) {
-                processedDays.add(dayKey);
-                this.dailyForecasts.push({
-                    day: this.dailyForecasts.length === 0 ? 'Today' : 
-                         date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }),
-                    temp: Math.round(item.main.temp),
-                    desc: item.weather[0].description,
-                    // icon: this.getWeatherIcon(item.weather[0].main, item.weather[0].icon)
-                    icon: item.weather[0].icon
-                });
-            }
-        }
+    // One Call API 3.0 provides 8 days of daily forecast (including today)
+    this.dailyData.slice(0, 7).forEach((day:any, index) => {
+      const date = new Date(day.dt * 1000);
+      const dayName = index === 0 ? 'Today' : 
+                     index === 1 ? 'Tomorrow' :
+                     date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+
+      this.dailyForecasts.push({
+        day: dayName,
+        temp: Math.round(day.temp.day),
+        icon: day.weather[0].icon,
+        summary: day.summary
+      });
     });
+
+    // this.dailyData.forEach((item:any) => {
+    //     const date = new Date(item.dt * 1000);
+    //     const dayKey = date.toDateString();
+        
+    //     if (!processedDays.has(dayKey) && this.dailyForecasts.length < 5) {
+    //         const hour = date.getHours();
+    //         if (hour >= 11 && hour <= 15) {
+    //             processedDays.add(dayKey);
+    //             this.dailyForecasts.push({
+    //                 day: this.dailyForecasts.length === 0 ? 'Today' : 
+    //                      date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }),
+    //                 temp: Math.round(item.main.temp),
+    //                 desc: item.weather[0].description,
+    //                 // icon: this.getWeatherIcon(item.weather[0].main, item.weather[0].icon)
+    //                 icon: item.weather[0].icon
+    //             });
+    //         }
+    //     }
+    // });
   }
 
   updateHourlyForecast() {
@@ -183,19 +226,23 @@ export class WeatherDashboard {
     this.hourlyForecasts = [];
 
     // Take first 5 hours of forecast
-    this.forecastData.slice(0, 5).forEach((item:any) => {
-        const date = new Date(item.dt * 1000);
+        this.hourlyData.slice(0, 5).forEach((hour:any) => {
+        const date = new Date(hour.dt * 1000);
         const time = date.toLocaleTimeString('en-GB', { 
             hour: '2-digit', 
             minute: '2-digit',
             timeZone: 'Asia/Colombo'
         });
 
+        // Calculate wind direction
+        const windDirection = this.getWindDirection(hour.wind_deg);
+
         this.hourlyForecasts.push({
           time: time,
-          temp: Math.round(item.main.temp),
-          speed: Math.round(item.wind.speed * 3.6),
-          icon: item.weather[0].icon
+          temp: Math.round(hour.temp),
+          speed: Math.round(hour.wind_speed * 3.6),
+          icon: hour.weather[0].icon,
+          windDirection: windDirection
         });
     });
   }
@@ -217,18 +264,24 @@ export class WeatherDashboard {
     });
   }
 
-  estimateUVIndex(weatherMain:any) {
-    const uvIndexes:any = {
-        'Clear': '8-10',
-        'Clouds': '4-6',
-        'Rain': '2-4',
-        'Thunderstorm': '1-3',
-        'Snow': '5-7',
-        'Mist': '3-5',
-        'Fog': '2-4'
-    };
-    return uvIndexes[weatherMain] || '5-7';
+  getWindDirection(degrees:any) {
+    const directions = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+    const index = Math.round(degrees / 45) % 8;
+    return directions[index];
   }
+
+  // estimateUVIndex(weatherMain:any) {
+  //   const uvIndexes:any = {
+  //       'Clear': '8-10',
+  //       'Clouds': '4-6',
+  //       'Rain': '2-4',
+  //       'Thunderstorm': '1-3',
+  //       'Snow': '5-7',
+  //       'Mist': '3-5',
+  //       'Fog': '2-4'
+  //   };
+  //   return uvIndexes[weatherMain] || '5-7';
+  // }
 
   // getWeatherIcon(weatherMain:any, iconCode:any) {
   //   const iconMap:any = {
@@ -257,7 +310,19 @@ export class WeatherDashboard {
   }
 
   onSearch(){
-    alert("SEARCH")
+    const search = this.searchText.trim().toLowerCase();
+
+    // Find a matching city (case-insensitive)
+    const matchedCity = this.allCities.find(city => city.name.toLowerCase() === search);
+
+    if (matchedCity) {
+      console.log("Matched city:", matchedCity);
+      this.selectedCity = matchedCity;
+      this.getWeatherData();
+    } else {
+      console.log("No match found. Fetching lat/lon from API...");
+      this.getLatAndLon(); // Dynamic search
+    }
   }
 
   toggleDarkMode(isDark: boolean) {

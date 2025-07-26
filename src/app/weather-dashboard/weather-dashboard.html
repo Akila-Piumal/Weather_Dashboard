@@ -27,7 +27,7 @@
         </mat-form-field> -->
 
         <div class="search-container">
-            <input type="text" [(ngModel)]="searchText" class="search-input" placeholder="Search for your preferred city...">
+            <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearch()" class="search-input" placeholder="Search for your preferred city...">
             <span class="search-icon">🔍</span>
         </div>
         
@@ -47,7 +47,7 @@
 
     <div class="mb-3">
         <select class="form-select bg-transparent text-white rounded" aria-label="Select City" [(ngModel)]="selectedCity" (ngModelChange)="onCityChange($event)">
-          <option *ngFor="let city of allCities" [value]="city.value">{{ city.name }}</option>
+          <option *ngFor="let city of allCities" [ngValue]="city">{{ city.name }}</option>
         </select>
     </div>
 
@@ -59,7 +59,7 @@
         <div class="main-grid">
             <!-- Clock Card -->
             <div class="clock-card">
-                <div class="city-name" id="clockCityName">{{selectedCity}}</div>
+                <div class="city-name" id="clockCityName">{{selectedCity.name}}</div>
                 <div class="current-time" id="currentTime">{{currentTime}}</div>
                 <div class="current-date" id="currentDate">{{currentDate}}</div>
             </div>
@@ -119,9 +119,9 @@
 
         <!-- Forecast Container -->
         <div class="forecast-container">
-            <!-- 5 Days Forecast -->
+            <!-- 7 Days Forecast -->
             <div class="weather-card">
-                <h3 class="forecast-title">5 Days Forecast:</h3>
+                <h3 class="forecast-title">7 Days Forecast:</h3>
                 <div class="daily-forecast" id="dailyForecast">
                     <div class="forecast-day" *ngFor="let forcast of dailyForecasts">
                         <div class="day-info">
@@ -131,6 +131,8 @@
                             </div>
                             <div class="day-temp">{{forcast.temp}}°C</div>
                             <div class="day-name">{{forcast.day}}</div>
+                            <div class="day-name">{{forcast.day}}</div>
+                            <div class="day-name">{{forcast.summary}}</div>
                         </div>
                     </div>
                 </div>
@@ -147,7 +149,7 @@
                         </div>
                         <div class="hour-temp">{{forcast.temp}}°C</div>
                         <div class="hour-wind">
-                                <span class="wind-direction">↗</span>
+                                <span class="wind-direction">{{forcast.windDirection}}</span>
                                 <span>{{forcast.speed}}km/h</span>
                         </div>
                     </div>
