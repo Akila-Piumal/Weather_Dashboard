@@ -1,0 +1,159 @@
+<div class="dashboard-container">
+    <!-- Header start -->
+    <div class="header">
+        <div class="theme-toggle-container">
+            <mat-slide-toggle 
+              class="theme-toggle"
+              [checked]="isDarkMode"
+              (change)="toggleDarkMode($event.checked)">
+              🌙 Dark Mode
+            </mat-slide-toggle>
+        </div>
+
+        <!-- <mat-form-field class="example-full-width" appearance="outline">
+            <input
+                style="color: white!important;"
+              type="text"
+              placeholder="Search for your preferred city..."
+              matInput
+              [formControl]="searchControl"
+              [matAutocomplete]="auto"
+            >
+            <mat-autocomplete  #auto="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+              <mat-option style="color: white;" *ngFor="let city of filteredCities | async" [value]="city.name">
+                {{ city.name }}
+              </mat-option>
+            </mat-autocomplete>
+        </mat-form-field> -->
+
+        <div class="search-container">
+            <input type="text" [(ngModel)]="searchText" class="search-input" placeholder="Search for your preferred city...">
+            <span class="search-icon">🔍</span>
+        </div>
+        
+        <button class="current-location-btn">
+            <span>🎯</span>
+            Current Location
+        </button>
+    </div>
+    <!-- Header end -->
+
+    <!-- City Selector -->
+    <!-- <div class="city-selector">
+        <select id="citySelect" *ngFor="let city of allCities">
+            <option value={{city.value}}>{{city.name}}</option>
+        </select>
+    </div> -->
+
+    <div class="mb-3">
+        <select class="form-select bg-transparent text-white rounded" aria-label="Select City" [(ngModel)]="selectedCity" (ngModelChange)="onCityChange($event)">
+          <option *ngFor="let city of allCities" [value]="city.value">{{ city.name }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="isLoading" id="loading" class="loading">Loading weather data...</div>
+    <div *ngIf="isError" id="error" class="error">Error</div>
+
+    <div id="weatherContent">
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Clock Card -->
+            <div class="clock-card">
+                <div class="city-name" id="clockCityName">{{selectedCity}}</div>
+                <div class="current-time" id="currentTime">{{currentTime}}</div>
+                <div class="current-date" id="currentDate">{{currentDate}}</div>
+            </div>
+
+            <!-- Current Weather Card -->
+            <div class="weather-card current-weather-card">
+                <div class="weather-main">
+                    <div class="temperature-display">{{mainTemperature}}</div>
+                    <div class="feels-like" id="mainFeelsLike">{{mainFeelsLike}}</div>
+                    
+                    <div class="sun-times">
+                        <div class="sun-time">
+                            <span>☀️</span>
+                            <span>Sunrise</span>
+                            <span>{{sunriseTime}}</span>
+                        </div>
+                        <div class="sun-time">
+                            <span>🌅</span>
+                            <span>Sunset</span>
+                            <span >{{sunsetTime}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-visual">
+                    <div class="weather-icon-large">
+                        <!-- {{mainWeatherIcon}} -->
+                        <img [src]="'https://openweathermap.org/img/wn/' + mainWeatherIcon + '@2x.png'" alt="weather icon">
+                    </div>
+                    <div class="weather-condition" >{{mainCondition | capitalize}}</div>
+                    
+                    <div class="weather-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">💧</div>
+                            <div class="stat-value" >{{mainHumidity}}</div>
+                            <div class="stat-label">Humidity</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">💨</div>
+                            <div class="stat-value" >{{mainWindSpeed}}</div>
+                            <div class="stat-label">Wind Speed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">🕐</div>
+                            <div class="stat-value">{{mainPressure}}</div>
+                            <div class="stat-label">Pressure</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">☀️</div>
+                            <div class="stat-value">{{mainUV}}</div>
+                            <div class="stat-label">UV Estimated</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast Container -->
+        <div class="forecast-container">
+            <!-- 5 Days Forecast -->
+            <div class="weather-card">
+                <h3 class="forecast-title">5 Days Forecast:</h3>
+                <div class="daily-forecast" id="dailyForecast">
+                    <div class="forecast-day" *ngFor="let forcast of dailyForecasts">
+                        <div class="day-info">
+                            <div class="day-icon">
+                                <!-- {{forcast.icon}} -->
+                                <img [src]="'https://openweathermap.org/img/wn/' + forcast.icon + '.png'" alt="weather icon">
+                            </div>
+                            <div class="day-temp">{{forcast.temp}}°C</div>
+                            <div class="day-name">{{forcast.day}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="weather-card">
+                <h3 class="forecast-title">Hourly Forecast:</h3>
+                <div class="hourly-forecast" id="hourlyForecast">
+                    <div class="hourly-item" *ngFor="let forcast of hourlyForecasts">
+                        <div class="hour-time">{{forcast.time}}</div>
+                        <div class="hour-icon">
+                            <img [src]="'https://openweathermap.org/img/wn/' + forcast.icon + '@2x.png'" alt="weather icon">
+                        </div>
+                        <div class="hour-temp">{{forcast.temp}}°C</div>
+                        <div class="hour-wind">
+                                <span class="wind-direction">↗</span>
+                                <span>{{forcast.speed}}km/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
