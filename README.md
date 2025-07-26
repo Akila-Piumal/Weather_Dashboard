@@ -1,10 +1,11 @@
 # WeatherDashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+Deploy URL - (https://weather-dashboard-eta-azure.vercel.app/)
 
-## Development server
+## Technologies
 
-To start a local development server, run:
+Angular
+OpenWeatherMap
 
 ```bash
 ng serve
