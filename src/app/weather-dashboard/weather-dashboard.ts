@@ -60,16 +60,9 @@ export class WeatherDashboard {
   private apiKey = environment.apiKey;
   private baseUrl = environment.baseUrl;
 
-  searchControl = new FormControl('');
-  filteredCities!: Observable<{name: string, value: string}[]>;
+  rainDrops = Array(6).fill(0);
 
   ngOnInit() {
-    this.filteredCities = this.searchControl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || ''))
-    );
-
-
 
     // Get Weather Data on init
     this.getWeatherData();
@@ -79,7 +72,6 @@ export class WeatherDashboard {
   async getLatAndLon(){
     const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.searchText},Sri+Lanka&format=json&limit=1`);
     
-    console.log("RESPONSe===============>>>",response);
     const data = await response.json();
     if (data.length > 0) {
       const city = {name: this.searchText , value: this.searchText, lat: data[0].lat, lon: data[0].lon }
@@ -92,13 +84,15 @@ export class WeatherDashboard {
   }
 
   onCityChange(cityValue:any) {
-    console.log("Selected city:", cityValue);
-    // Call your weather API or any other function here
     this.getWeatherData()
   }
 
   async getWeatherData(){
     this.isLoading = true;
+
+    this.currentWeatherData=[]
+    this.dailyForecasts = []
+    this.hourlyForecasts = []
 
     this.setTime();
 
@@ -226,7 +220,7 @@ export class WeatherDashboard {
     this.hourlyForecasts = [];
 
     // Take first 5 hours of forecast
-        this.hourlyData.slice(0, 5).forEach((hour:any) => {
+        this.hourlyData.slice(0, 10).forEach((hour:any) => {
         const date = new Date(hour.dt * 1000);
         const time = date.toLocaleTimeString('en-GB', { 
             hour: '2-digit', 

@@ -51,7 +51,7 @@
         </select>
     </div>
 
-    <div *ngIf="isLoading" id="loading" class="loading">Loading weather data...</div>
+    <div *ngIf="isLoading && !isError" id="loading" class="loading">Loading weather data...</div>
     <div *ngIf="isError" id="error" class="error">Error</div>
 
     <div id="weatherContent">
@@ -110,7 +110,7 @@
                         <div class="stat-item">
                             <div class="stat-icon">☀️</div>
                             <div class="stat-value">{{mainUV}}</div>
-                            <div class="stat-label">UV Estimated</div>
+                            <div class="stat-label">UV</div>
                         </div>
                     </div>
                 </div>
@@ -155,6 +155,21 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="loader-backdrop" *ngIf="isLoading">
+        <div class="loader-container">
+            <div class="weather-loader">
+                <div class="cloud">
+                    <div class="cloud-body"></div>
+                    <div class="raindrops">
+                      <div class="raindrop" *ngFor="let drop of rainDrops; let i = index" [style.animation-delay]="i * 0.2 + 's'"></div>
+                    </div>
+                </div>
+            </div>
+          <!-- <div class="spinner"></div>
+          <p class="loader-text">Loading...</p> -->
         </div>
     </div>
 

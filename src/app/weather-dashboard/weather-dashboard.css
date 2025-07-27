@@ -1,5 +1,5 @@
 .dashboard-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -273,7 +273,7 @@
 /* Forecast Sections */
 .forecast-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 0.8fr 1fr;
     gap: 20px;
 }
 
@@ -329,9 +329,11 @@
 /* Hourly Forecast */
 .hourly-forecast {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     overflow-x: auto;
     padding-bottom: 10px;
+    justify-content: center;
 }
 
 .hourly-item {
@@ -488,3 +490,147 @@
 .hourly-item:hover {
     background: rgba(255,255,255,0.1);
 }
+
+
+
+
+
+.weather-loader {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex
+;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Rain Animation */
+.cloud {
+    position: relative;
+    width: 60px;
+    height: 40px;
+  }
+  
+  .cloud-body {
+    background: #87CEEB;
+    border-radius: 25px;
+    width: 60px;
+    height: 30px;
+    position: relative;
+  }
+  
+  .cloud-body::before {
+    content: '';
+    position: absolute;
+    background: #87CEEB;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    top: -10px;
+    left: 10px;
+  }
+  
+  .cloud-body::after {
+    content: '';
+    position: absolute;
+    background: #87CEEB;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    top: -15px;
+    right: 10px;
+  }
+  
+  .cloud-body.dark {
+    background: #4A4A4A;
+  }
+  
+  .cloud-body.dark::before,
+  .cloud-body.dark::after {
+    background: #4A4A4A;
+  }
+  
+  .cloud-body.light {
+    background: #E6F3FF;
+  }
+  
+  .cloud-body.light::before,
+  .cloud-body.light::after {
+    background: #E6F3FF;
+  }
+
+  .raindrops {
+    position: absolute;
+    top: 35px;
+    left: 5px;
+    width: 50px;
+  }
+  
+  .raindrop {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: #4A90E2;
+    border-radius: 0 0 50% 50%;
+    animation: fall 1s infinite linear;
+  }
+  
+  .raindrop:nth-child(1) { left: 10px; }
+  .raindrop:nth-child(2) { left: 20px; }
+  .raindrop:nth-child(3) { left: 30px; }
+  .raindrop:nth-child(4) { left: 40px; }
+  .raindrop:nth-child(5) { left: 15px; }
+  .raindrop:nth-child(6) { left: 35px; }
+
+  
+  @keyframes fall {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(25px); opacity: 0; }
+  }
+
+.loader-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+  }
+  
+  .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loader-text {
+    margin-top: 15px;
+    margin-bottom: 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+  }
